@@ -5,7 +5,7 @@ import "@fontsource-variable/instrument-sans/wdth.css";
 import "./styles/main.css";
 
 import { $, $$, hasWebGL } from "./core/dom";
-import { getBest, getSoundPref, on } from "./core/settings";
+import { getBest, on } from "./core/settings";
 import { setEnabled } from "./audio/sound";
 import { launchGame } from "./game/launcher";
 
@@ -16,8 +16,9 @@ on("best", showBest);
 const play = $<HTMLButtonElement>("#play")!;
 if (!hasWebGL()) play.hidden = true;
 
+// sound is on from the start, and begins on the visitor's first click or key press
+setEnabled(true);
+
 play.addEventListener("click", () => {
-  // this click is the user gesture that lets audio start, if the visitor opted in before
-  if (getSoundPref()) setEnabled(true);
   launchGame({ exitLabel: "Back to the 404 page" });
 });

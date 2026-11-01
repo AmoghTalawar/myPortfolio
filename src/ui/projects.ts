@@ -86,8 +86,9 @@ export function initProjects(opts: { lockScroll: (on: boolean) => void }) {
   });
   report("all");
 
-  // buttons give a small press response, except on the paper, which stays as it is
-  $$(".btn").filter((b) => !b.closest(".proj-pub")).forEach((b) => {
+  // buttons give a small press response, except on the paper, which stays as it is.
+  // A card's View label is part of the card's own button, which already responds to presses.
+  $$(".btn").filter((b) => !b.closest(".proj-pub") && !b.matches(".mod-view")).forEach((b) => {
     press(b, () => {
       animate(b, { scale: 0.96 }, spring());
       return () => animate(b, { scale: 1 }, spring(0.45));

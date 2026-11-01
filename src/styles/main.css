@@ -1978,6 +1978,24 @@ html.motion-on .proj-board:not(.is-powered) .proj {
   height: 15px;
 }
 
+.mod-view {
+  align-self: flex-start;
+  gap: 6px;
+  min-height: 0;
+  margin-top: 2px;
+  padding: 6px 12px;
+  font-size: var(--fs-12);
+}
+
+.mod-view .ic {
+  width: 13px;
+  height: 13px;
+}
+
+.mod-open:hover .mod-view {
+  background: color-mix(in srgb, var(--a) 86%, #000);
+}
+
 /* the 5G project is the largest module: its card plays the system diagram */
 .proj-board .mod-12 {
   display: grid;
@@ -3283,48 +3301,8 @@ html .term.term input {
   opacity: 1;
 }
 
-/* ---------- side quests + arcade ---------- */
-.quests {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.quest {
-  padding: 22px 24px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-}
-
-.quest.is-placeholder {
-  border-style: dashed;
-  position: relative;
-}
-
-.quest.is-placeholder::after {
-  content: "Placeholder";
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  font-family: var(--f-mono);
-  font-size: var(--fs-12);
-  color: var(--b);
-}
-
-.quest p {
-  color: var(--muted);
-  margin-top: 6px;
-  font-size: var(--fs-16);
-}
-
-.quest .quest-link {
-  font-size: var(--fs-14);
-}
-
+/* ---------- arcade ---------- */
 .arcade {
-  margin-top: 22px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 24px;
@@ -3713,14 +3691,6 @@ html:not(.js) #boot {
   transform: scaleX(0);
 }
 
-.boot-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 26px;
-  font-family: var(--f-sans);
-}
-
 body.is-booting {
   overflow: hidden;
 }
@@ -4107,8 +4077,7 @@ body.is-booting {
     grid-template-columns: 1fr;
   }
 
-  .skills,
-  .quests {
+  .skills {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -4129,8 +4098,7 @@ body.is-booting {
     font-size: 11px;
   }
 
-  .skills,
-  .quests {
+  .skills {
     grid-template-columns: 1fr;
   }
 

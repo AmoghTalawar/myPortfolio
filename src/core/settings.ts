@@ -1,6 +1,6 @@
 /* Persistent preferences + a tiny event bus shared by every module. */
 
-const KEYS = { sound: "deck.sound", best: "orbitrun.best" } as const;
+const KEYS = { best: "orbitrun.best" } as const;
 
 function read(key: string): string | null {
   try {
@@ -52,13 +52,8 @@ export function markBooted() {
   }
 }
 
-/** Stored sound preference. Sound is off until the visitor opts in. */
-export function getSoundPref(): boolean {
-  return read(KEYS.sound) === "on";
-}
-
+/** Tells the rest of the site that sound was switched. It isn't stored: every visit starts with sound on. */
 export function setSoundPref(onOff: boolean) {
-  write(KEYS.sound, onOff ? "on" : "off");
   emit("sound", onOff);
 }
 

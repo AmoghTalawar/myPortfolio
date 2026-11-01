@@ -1,5 +1,5 @@
 /* Terminal-style boot sequence. Each line reports real work (fonts, renderer, content index);
-   it resolves with the visitor's sound choice once they press Enter. */
+   it resolves on its own once everything has loaded. */
 import { $, $$ } from "../core/dom";
 
 export interface BootTask {
@@ -9,12 +9,11 @@ export interface BootTask {
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function runBoot(tasks: BootTask[], opts: { fast: boolean; preferSound: boolean }): Promise<boolean> {
+export async function runBoot(tasks: BootTask[], opts: { fast: boolean }): Promise<void> {
   const boot = $("#boot")!;
   const log = $("#boot-log")!;
   const bar = $("#boot-bar")!;
   const meter = $(".boot-meter", boot)!;
-  const actions = $("#boot-actions")!;
 
   document.body.classList.add("is-booting");
   const others = [...document.body.children].filter((el) => el !== boot && el.tagName !== "SCRIPT") as HTMLElement[];
@@ -43,24 +42,10 @@ export async function runBoot(tasks: BootTask[], opts: { fast: boolean; preferSo
     if (lineDelay) await wait(lineDelay);
   }
 
-  actions.hidden = false;
-  const soundBtn = $<HTMLButtonElement>("#enter-sound")!;
-  const quietBtn = $<HTMLButtonElement>("#enter-quiet")!;
-  // the visitor's last choice becomes the highlighted default
-  if (!opts.preferSound) {
-    soundBtn.classList.remove("primary");
-    quietBtn.classList.add("primary");
-    quietBtn.after(soundBtn);
-    quietBtn.focus();
-  } else soundBtn.focus();
-
-  const withSound = await new Promise<boolean>((resolve) => {
-    soundBtn.addEventListener("click", () => resolve(true), { once: true });
-    quietBtn.addEventListener("click", () => resolve(false), { once: true });
-  });
+  // a beat to see the finished log before the screen closes
+  if (!opts.fast) await wait(350);
 
   others.forEach((el) => (el.inert = false));
-  return withSound;
 }
 
 /** Fade the boot overlay away, then remove it. */

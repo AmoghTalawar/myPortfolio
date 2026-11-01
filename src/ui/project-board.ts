@@ -191,6 +191,26 @@ export function initProjectBoard(opts: { lockScroll: (on: boolean) => void }) {
     }
   }
 
+  /* If the note grows when its text wraps, the board moves down and the card slides out from
+     under the pointer, which ends the hover and snaps it back; a click can then miss the card.
+     So the note always keeps room for its longest message. Touch screens never show it. */
+  function reserveNoteRoom() {
+    if (!note || !matchMedia("(hover: hover)").matches) return;
+    const current = note.textContent;
+    const longest = cards.map((c) => $(".mod-name", c)?.textContent ?? "").reduce((a, b) => (b.length > a.length ? b : a), "");
+    note.style.minHeight = "";
+    let tallest = 0;
+    for (const text of [`${longest} shares tools with ${cards.length} other projects.`, `${longest} uses tools no other project here does.`]) {
+      note.textContent = text;
+      tallest = Math.max(tallest, note.offsetHeight);
+    }
+    note.textContent = current;
+    note.style.minHeight = `${tallest}px`;
+  }
+  reserveNoteRoom();
+  document.fonts?.ready.then(reserveNoteRoom);
+  addEventListener("resize", reserveNoteRoom, { passive: true });
+
   /* ---------- selecting a module grows it into the detail view ---------- */
   const view = $<HTMLDialogElement>("#proj-view")!;
   const panel = $(".proj-view-panel", view)!;

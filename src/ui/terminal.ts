@@ -22,7 +22,7 @@ export interface TerminalOptions {
 
 const USER = "amogh@deck";
 const RESUME = "/Amogh-Talawar-Resume.pdf";
-const SECTIONS = ["top", "about", "projects", "publications", "experience", "skills", "certificates", "sidequests", "contact"];
+const SECTIONS = ["top", "about", "projects", "publications", "experience", "skills", "certificates", "arcade", "contact"];
 
 const COMMANDS: { name: string; usage: string; about: string }[] = [
   { name: "help", usage: "help [command]", about: "Show commands, or how one works" },

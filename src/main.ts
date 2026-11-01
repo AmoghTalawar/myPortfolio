@@ -9,7 +9,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 
 import { $, $$, cssColor, hasWebGL, isTyping, reducedMotion, toast } from "./core/dom";
-import { getBest, getSoundPref, hasBooted, markBooted, on, setSoundPref } from "./core/settings";
+import { getBest, hasBooted, markBooted, on, setSoundPref } from "./core/settings";
 import { isEnabled, setEnabled, sfx } from "./audio/sound";
 import { bootStats, dismissBoot, runBoot } from "./ui/boot";
 import { initCursor } from "./ui/cursor";
@@ -147,7 +147,6 @@ const sections: [string, string, string][] = [
   ["experience", "Experience", "briefcase"],
   ["skills", "Skills", "code"],
   ["certificates", "Certificates", "medal"],
-  ["sidequests", "Side Quests", "flask"],
   ["contact", "Contact", "mail"],
   ["message", "Send a message", "send"],
 ];
@@ -273,7 +272,7 @@ async function start() {
   const fast = reduce || hasBooted();
   const timeout = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>((r) => setTimeout(r, ms))]);
 
-  const withSound = await runBoot(
+  await runBoot(
     [
       { label: "loading typefaces", run: async () => void (await timeout(document.fonts.ready, 2500)) },
       {
@@ -294,13 +293,12 @@ async function start() {
       { label: "reading experience log", run: async () => `${stats.log} entries` },
       { label: "arcade", run: async () => `best score ${getBest()}` },
     ],
-    { fast, preferSound: getSoundPref() },
+    { fast },
   );
 
-  setEnabled(withSound);
-  setSoundPref(withSound);
+  // sound is on for every visit; the toggle mutes it until the next one
+  setEnabled(true);
   syncSoundUI();
-  if (withSound) sfx.open();
   markBooted();
 
   // smooth scroll

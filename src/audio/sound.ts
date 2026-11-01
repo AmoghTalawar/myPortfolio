@@ -7,6 +7,30 @@ let enabled = false;
 let hum: { stop: () => void } | null = null;
 let humWanted = false;
 let lastTick = 0;
+let gestureSeen = false;
+let waiting = false;
+
+/* Browsers keep a page silent until the visitor first clicks, taps or presses a key, and no page
+   can get round that. So sound starts on that first gesture. A touch that only scrolled doesn't
+   count as a gesture, so this keeps listening until the audio is actually running. */
+function startOnFirstGesture() {
+  if (waiting) return;
+  waiting = true;
+  const events = ["mousedown", "touchend", "keydown", "click"];
+  const onGesture = (e: Event) => {
+    if (e instanceof KeyboardEvent && e.key === "Escape") return; // browsers don't count Esc
+    gestureSeen = true;
+    if (!enabled) return;
+    const first = !ctx;
+    setEnabled(true);
+    ctx?.resume().then(() => {
+      if (ctx?.state !== "running") return;
+      events.forEach((name) => removeEventListener(name, onGesture, true));
+      if (first) sfx.open();
+    });
+  };
+  events.forEach((name) => addEventListener(name, onGesture, true));
+}
 
 function ensure(): AudioContext | null {
   if (ctx) return ctx;
@@ -27,10 +51,11 @@ export function isEnabled() {
   return enabled;
 }
 
-/** Must be called from a user gesture the first time it turns sound on. */
+/** Turning sound on before the visitor's first gesture takes effect on that gesture. */
 export function setEnabled(on: boolean) {
   enabled = on;
   if (on) {
+    if (!gestureSeen) return startOnFirstGesture();
     const c = ensure();
     if (!c || !master) return;
     c.resume();

@@ -96,7 +96,6 @@ Request an ACM certificate in **us-east-1** for your domain, add it to the distr
 | Where | What |
 |---|---|
 | `src/scene/character.ts`, `SHELF_LABELS` | Hover labels for the hero shelf objects (books, cricket, controller, clapperboard, sketchpad, in that order; the plant has no label). Keep them in step with the About hobbies. To change an object's model, edit the matching entry in `builders` in the same file. |
-| `index.html`, `#sidequests` | Three side-quest entries: title, description, link. Remove the `is-placeholder` class once filled in, which also removes the dashed border and the "Placeholder" tag. |
 | `index.html` `<head>` | Once you have a domain, add `<link rel="canonical">` and `og:url`, and make `og:image`/`twitter:image` absolute (`https://YOUR-DOMAIN/og.png`). There's a comment marking the spot. |
 | `public/og.png` | A generated 1200×630 preview image. Replace it with your own if you like. |
 
