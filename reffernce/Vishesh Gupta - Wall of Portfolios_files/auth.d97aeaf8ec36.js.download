@@ -1,0 +1,152 @@
+// =================== AUTH ===================
+// Authentication-related functionality (401 handling, filter gating)
+
+(() => {
+  // Import core utilities
+  const { isLoggedIn, qsa, qs, setSuppression, closeFiltersModal } = window.CoreUtils || {};
+
+  // ===== AUTH 401 FETCH PATCH =====
+  function patchFetchForAuth401() {
+    if (window._authFetchPatched) return;
+    const _fetch = window.fetch;
+    window.fetch = async function(input, init) {
+      const res = await _fetch(input, init);
+      try {
+        if (res && res.status === 401) {
+          // Show login only if user actually tried something meaningful
+          if (window._filterActionInProgress) { // || hasActiveFilterParams()
+            window.openLoginModal();
+          }
+        }
+      } catch (_) {}
+      return res;
+    };
+    window._authFetchPatched = true;
+  }
+
+  // Helpers for query gating
+  const FILTER_KEYS = ["country","yoe","desig","opentowork","company","industry"];
+  
+  function hasActiveFilterParams() {
+    const sp = new URLSearchParams(location.search);
+    for (const key of FILTER_KEYS) {
+      if (!sp.has(key)) continue;
+      const vals = sp.getAll(key).flatMap(v => v.split(",")).map(v => v.trim()).filter(Boolean);
+      if (!vals.length) continue;
+      if (key === "company" && vals.every(v => v.toLowerCase() === "all")) continue;
+      if (key === "industry" && vals.every(v => v.toLowerCase() === "all")) continue;
+      return true;
+    }
+    return false;
+  }
+
+  // ---- Reset all filters to defaults ("All"/unchecked) and refresh list
+  function clearFiltersToAll() {
+    // 1) Clear UI controls
+    qsa('.w-checkbox-input').forEach((cb) => (cb.checked = false));
+    const industryAll = qs('input[type="radio"][name="industry"][value="All"], input[type="radio"][name="industry"][value="all"]');
+    if (industryAll) industryAll.checked = true;
+    const companyAll = qs('input[type="radio"][name="company"][value="All"], input[type="radio"][name="company"][value="all"]');
+    if (companyAll) companyAll.checked = true;
+    const otw = qs('#open-to-work-toggle');
+    if (otw) otw.checked = false;
+
+    // 2) Strip filter params from URL (keep other params if any)
+    const sp = new URLSearchParams(location.search);
+    (FILTER_KEYS || []).forEach((k) => sp.delete(k));
+    sp.delete('page');
+    const newUrl = sp.toString() ? `${location.pathname}?${sp}` : location.pathname;
+    history.replaceState(null, '', newUrl);
+
+    // 3) Update local UI states
+    if (typeof updateFilterCount === 'function') updateFilterCount();
+    if (typeof updateActiveRadioStyles === 'function') updateActiveRadioStyles();
+    if (window.WopFilters) window.WopFilters.syncUI();
+
+    // 4) Refresh list via exposed fetch; fallback to reload
+    if (typeof window._wopFetchList === 'function') {
+      window._wopFetchList(true);
+    } else {
+      location.assign(newUrl);
+    }
+  }
+
+  // ===== GATE FILTERS → OPEN LOGIN MODAL IF LOGGED OUT =====
+  function gateFiltersWithLoginModal() {
+    if (isLoggedIn()) return;
+  
+    // Roots where filter interactions happen
+    const roots = Array.from(document.querySelectorAll('[fs-cmsfilter-element="filters"]'));
+  
+    // Also guard likely "open filters" triggers if you have them
+    const triggers = Array.from(document.querySelectorAll(
+      '.filters_link, [data-open="filters"], [aria-controls="filtersPane"], [data-filters-trigger="true"]'
+    ));
+  
+    const guard = (e) => {
+      if (isLoggedIn()) return;
+  
+      // if we just closed login or forced a close, don't toggle filters
+      if (window._suppressFilterOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        closeFiltersModal();
+        return;
+      }
+  
+      // block the action completely so the filters UI doesn't open
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+  
+      // mark that a real action occurred (used by 401 patch)
+      window._filterActionInProgress = true;
+      setTimeout(() => (window._filterActionInProgress = false), 1200);
+  
+      // ensure any filter modal/pane is closed, then open login
+      closeFiltersModal();
+      window.openLoginModal();
+    };
+  
+    // Capture-phase so we intercept before Webflow/Finsweet handlers
+    roots.forEach((root) => {
+      root.addEventListener("click", guard, true);
+      root.addEventListener("change", guard, true);
+      root.addEventListener("submit", guard, true);
+    });
+  
+    // Guard known triggers as well
+    triggers.forEach((t) => {
+      t.addEventListener("click", guard, true);
+    });
+  
+    // If some script still manages to open a filter modal, watch and kill it
+    const mo = new MutationObserver(() => {
+      if (!isLoggedIn()) {
+        const visibleFilterModal = document.querySelector(
+          '.filters-modal, #filtersPane, .w-dropdown-list.is--filters, [data-filters-modal="true"]'
+        );
+        if (!visibleFilterModal) return;
+        const style = getComputedStyle(visibleFilterModal);
+        if (style.display !== 'none' || visibleFilterModal.classList.contains('show') || visibleFilterModal.classList.contains('w--open') || visibleFilterModal.classList.contains('open')) {
+          // prevent flicker ping-pong
+          setSuppression('_suppressFilterOpen', 800);
+          closeFiltersModal();
+        }
+      }
+    });
+    mo.observe(document.documentElement, { subtree: true, attributes: true, childList: true });
+  }
+
+  // Export functions to window for use in other modules
+  window.Auth = {
+    init: () => {
+      patchFetchForAuth401();
+      gateFiltersWithLoginModal();
+    },
+    hasActiveFilterParams,
+    clearFiltersToAll
+  };
+})();
+

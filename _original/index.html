@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amogh Talawar | AI/ML, Networking , Devops & Full-Stack</title>
+  <meta name="description"
+    content="Portfolio of Amogh Talawar, Computer Science Engineering student at KLE Technological University working across AI/ML research, 5G edge systems, networking and full-stack development.">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #121826;
+      --panel2: #182033;
+      --text: #e6eaf2;
+      --muted: #9aa6bd;
+      --accent: #5eead4;
+      --accent2: #818cf8;
+      --border: #243049;
+      --radius: 14px;
+      --glow: rgba(94, 234, 212, .16);
+      --topo: 94, 234, 212;
+      --topo2: 129, 140, 248;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f6f8fc;
+      --panel: #ffffff;
+      --panel2: #eef2f9;
+      --text: #111827;
+      --muted: #53607a;
+      --accent: #0f766e;
+      --accent2: #4f46e5;
+      --border: #d9e0ee;
+      --glow: rgba(15, 118, 110, .14);
+      --topo: 15, 118, 110;
+      --topo2: 79, 70, 229;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg: #f6f8fc;
+        --panel: #ffffff;
+        --panel2: #eef2f9;
+        --text: #111827;
+        --muted: #53607a;
+        --accent: #0f766e;
+        --accent2: #4f46e5;
+        --border: #d9e0ee;
+        --glow: rgba(15, 118, 110, .14);
+        --topo: 15, 118, 110;
+        --topo2: 79, 70, 229;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 70px
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      transition: background .4s, color .4s
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    .wrap {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative
+    }
+
+    /* ---------- topographic background ---------- */
+    #topo {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    body::after {
+      /* soft vignette so text stays readable over the contours */
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 30%, transparent 0%, var(--bg) 120%);
+      opacity: .55
+    }
+
+    nav,
+    header,
+    section,
+    footer {
+      position: relative;
+      z-index: 1
+    }
+
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0;
+      z-index: 30;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 10px var(--accent)
+    }
+
+    /* ---------- icons ---------- */
+    .ic {
+      width: 1.15em;
+      height: 1.15em;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: none;
+      vertical-align: -.2em
+    }
+
+    .ic-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      background: linear-gradient(135deg, var(--glow), color-mix(in srgb, var(--accent2) 16%, transparent));
+      border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+      transition: transform .35s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s;
+      flex: none
+    }
+
+    .ic-box .ic {
+      width: 22px;
+      height: 22px
+    }
+
+    .card:hover .ic-box,
+    .skill-box:hover .ic-box,
+    .stat:hover .ic-box {
+      transform: rotate(-8deg) scale(1.12);
+      box-shadow: 0 0 22px var(--glow)
+    }
+
+    /* ---------- nav ---------- */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border)
+    }
+
+    nav .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px
+    }
+
+    nav .logo {
+      font-weight: 800;
+      letter-spacing: .3px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    nav .logo i {
+      font-style: normal;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: .8rem;
+      color: #0b0f17;
+      background: linear-gradient(135deg, var(--accent), var(--accent2))
+    }
+
+    nav ul {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    nav ul a {
+      color: var(--muted);
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: color .2s, background .2s
+    }
+
+    nav ul a:hover,
+    nav ul a.active {
+      color: var(--accent);
+      text-decoration: none;
+      background: var(--glow)
+    }
+
+    #theme {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      margin-left: 6px;
+      transition: color .2s, border-color .2s, transform .4s
+    }
+
+    #theme:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: rotate(25deg)
+    }
+
+    #theme .moon {
+      display: none
+    }
+
+    :root[data-theme="light"] #theme .sun {
+      display: none
+    }
+
+    :root[data-theme="light"] #theme .moon {
+      display: block
+    }
+
+    /* ---------- hero ---------- */
+    .hero {
+      padding: 90px 0 60px
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: .95rem;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+      border-radius: 999px;
+      background: var(--glow)
+    }
+
+    .eyebrow .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 var(--accent);
+      animation: ping 2s infinite
+    }
+
+    @keyframes ping {
+      70% {
+        box-shadow: 0 0 0 9px transparent
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 transparent
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      line-height: 1.1;
+      margin: 16px 0 14px
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 6s linear infinite
+    }
+
+    @keyframes shine {
+      to {
+        background-position: 200% center
+      }
+    }
+
+    .roles {
+      font-size: 1.25rem;
+      font-weight: 600;
+      min-height: 1.9em;
+      color: var(--text);
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace
+    }
+
+    .roles::before {
+      content: "> ";
+      color: var(--accent)
+    }
+
+    .roles::after {
+      content: "▍";
+      color: var(--accent);
+      animation: blink 1s steps(1) infinite
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0
+      }
+    }
+
+    .hero p.lead {
+      color: var(--muted);
+      font-size: 1.12rem;
+      max-width: 720px
+    }
+
+    .cta {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: .95rem;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .25s, border-color .2s
+    }
+
+    .btn:hover {
+      text-decoration: none;
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 22px var(--glow)
+    }
+
+    .btn .ic {
+      transition: transform .25s
+    }
+
+    .btn:hover .ic {
+      transform: translateX(3px)
+    }
+
+    .btn.primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color: #0b0f17;
+      border: none
+    }
+
+    .btn .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .45);
+      transform: scale(0);
+      animation: rip .6s ease-out;
+      pointer-events: none
+    }
+
+    @keyframes rip {
+      to {
+        transform: scale(4);
+        opacity: 0
+      }
+    }
+
+    .scroll-hint {
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: .82rem;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .scroll-hint .ic {
+      animation: bob 1.8s ease-in-out infinite
+    }
+
+    @keyframes bob {
+      50% {
+        transform: translateY(5px)
+      }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-top: 46px
+    }
+
+    .stat {
+      background: color-mix(in srgb, var(--panel) 86%, transparent);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      transition: transform .25s, border-color .25s
+    }
+
+    .stat:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent)
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.5rem;
+      color: var(--accent);
+      line-height: 1.2
+    }
+
+    .stat small {
+      color: var(--muted);
+      line-height: 1.3;
+      display: block
+    }
+
+    /* ---------- sections ---------- */
+    section {
+      padding: 56px 0
+    }
+
+    section h2 {
+      font-size: 1.7rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    section h2 .ic {
+      color: var(--accent);
+      width: 1.1em;
+      height: 1.1em
+    }
+
+    section h2::after {
+      content: "";
+      height: 2px;
+      flex: 1;
+      max-width: 120px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent)
+    }
+
+    .contact h2 {
+      justify-content: center
+    }
+
+    .contact h2::after {
+      display: none
+    }
+
+    section .sub {
+      color: var(--muted);
+      margin-bottom: 28px
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1)
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: none
+    }
+
+    /* ---------- filters ---------- */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px
+    }
+
+    .filter {
+      font: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--panel) 80%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s
+    }
+
+    .filter:hover {
+      color: var(--accent);
+      border-color: var(--accent)
+    }
+
+    .filter.on {
+      color: #0b0f17;
+      border-color: transparent;
+      background: linear-gradient(90deg, var(--accent), var(--accent2))
+    }
+
+    /* ---------- cards ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 18px;
+      perspective: 1000px
+    }
+
+    .card {
+      --mx: 50%;
+      --my: 50%;
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: border-color .2s, transform .15s ease-out, opacity .35s, box-shadow .3s
+    }
+
+    .card::before {
+      /* cursor spotlight */
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s;
+      background: radial-gradient(320px circle at var(--mx) var(--my), var(--glow), transparent 65%)
+    }
+
+    .card:hover::before {
+      opacity: 1
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .25)
+    }
+
+    .card.hide {
+      display: none
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .card h3 {
+      font-size: 1.1rem
+    }
+
+    .card .tag {
+      font-size: .78rem;
+      color: var(--accent2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: .95rem
+    }
+
+    .card ul {
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: .93rem
+    }
+
+    .card li {
+      margin-bottom: 3px
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: auto;
+      padding-top: 6px
+    }
+
+    .chip {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 11px;
+      font-size: .78rem;
+      color: var(--muted);
+      transition: all .2s
+    }
+
+    .chip:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-2px)
+    }
+
+    /* ---------- timeline ---------- */
+    .timeline {
+      border-left: 2px solid var(--border);
+      padding-left: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      margin-left: 14px;
+      position: relative
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: -2px;
+      top: 0;
+      width: 2px;
+      height: var(--tl, 0%);
+      background: linear-gradient(var(--accent), var(--accent2));
+      box-shadow: 0 0 10px var(--accent)
+    }
+
+    .tl-item {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: background .25s, border-color .25s
+    }
+
+    .tl-item:hover {
+      background: color-mix(in srgb, var(--panel) 85%, transparent);
+      border-color: var(--border)
+    }
+
+    .tl-item .tl-ic {
+      position: absolute;
+      left: -50px;
+      top: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      background: var(--bg);
+      border: 2px solid var(--border);
+      transition: all .3s
+    }
+
+    .tl-item:hover .tl-ic {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--glow);
+      transform: scale(1.1)
+    }
+
+    .tl-item h3 {
+      font-size: 1.05rem
+    }
+
+    .tl-item .meta {
+      color: var(--accent2);
+      font-size: .88rem;
+      font-weight: 600
+    }
+
+    .tl-item p {
+      color: var(--muted);
+      font-size: .95rem;
+      margin-top: 4px
+    }
+
+    /* ---------- skills ---------- */
+    .skills {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px
+    }
+
+    .skill-box {
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: transform .25s, border-color .25s
+    }
+
+    .skill-box:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent)
+    }
+
+    .skill-box h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .skill-box .chips {
+      margin-top: 0
+    }
+
+    .about {
+      display: grid;
+      gap: 14px;
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 1.04rem
+    }
+
+    .about strong {
+      color: var(--text)
+    }
+
+    .contact {
+      text-align: center
+    }
+
+    .contact p {
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 22px
+    }
+
+    .field {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      color: var(--text);
+      font: inherit;
+      transition: border-color .2s, box-shadow .2s
+    }
+
+    .field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--glow)
+    }
+
+    .count {
+      text-align: right;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: -6px
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 26px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: .88rem;
+      background: color-mix(in srgb, var(--bg) 80%, transparent)
+    }
+
+    /* ---------- floating bits ---------- */
+    #hud {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 15;
+      font: 11px/1.4 ui-monospace, Consolas, monospace;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--panel) 80%, transparent);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 11px;
+      pointer-events: none
+    }
+
+    #hud b {
+      color: var(--accent);
+      font-weight: 600
+    }
+
+    #top-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 15;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      background: var(--panel);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: all .3s
+    }
+
+    #top-btn.show {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto
+    }
+
+    #top-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--glow)
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translate(-50%, 30px);
+      opacity: 0;
+      z-index: 40;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: .9rem;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      transition: all .3s;
+      pointer-events: none
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0)
+    }
+
+    #toast .ic {
+      color: var(--accent)
+    }
+
+    @media (max-width:760px) {
+      nav ul li:not(:last-child) a span {
+        display: none
+      }
+
+      #hud {
+        display: none
+      }
+    }
+
+    @media (max-width:640px) {
+      nav ul {
+        gap: 2px
+      }
+
+      .hero {
+        padding: 60px 0 40px
+      }
+
+      .tl-item .tl-ic {
+        left: -46px
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- icon sprite (Lucide-style outline icons) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M8 13h8M8 17h5"/></symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2"/></symbol>
+      <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-2.93 1.41-1.41m11.32-11.32 1.41-1.41M2 12h2m16 0h2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+      <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19"/></symbol>
+      <symbol id="i-network" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3M12 12V8"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+      <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></symbol>
+      <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+      <symbol id="i-game" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6M12 19h8"/></symbol>
+      <symbol id="i-signal" viewBox="0 0 24 24"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4v16"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+      <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0Z"/></symbol>
+      <symbol id="i-grad" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5M22 10v6"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+      <symbol id="i-medal" viewBox="0 0 24 24"><circle cx="12" cy="15" r="6"/><path d="m8.5 10.5-3-8h5l1.5 4M15.5 10.5l3-8h-5L12 6.5"/></symbol>
+    </defs>
+  </svg>
+
+  <canvas id="topo" aria-hidden="true"></canvas>
+  <div id="progress"></div>
+
+  <nav>
+    <div class="wrap">
+      <a class="logo" href="#top"><i>AT</i></a>
+      <ul>
+        <li><a href="#about"><svg class="ic"><use href="#i-user" /></svg><span>About</span></a></li>
+        <li><a href="#projects"><svg class="ic"><use href="#i-folder" /></svg><span>Projects</span></a></li>
+        <li><a href="#publications"><svg class="ic"><use href="#i-file" /></svg><span>Papers</span></a></li>
+        <li><a href="#experience"><svg class="ic"><use href="#i-briefcase" /></svg><span>Experience</span></a></li>
+        <li><a href="#skills"><svg class="ic"><use href="#i-code" /></svg><span>Skills</span></a></li>
+        <li><a href="#contact"><svg class="ic"><use href="#i-mail" /></svg><span>Contact</span></a></li>
+        <li><button id="theme" aria-label="Toggle theme" title="Toggle theme"><svg class="ic sun"><use href="#i-sun" /></svg><svg class="ic moon"><use href="#i-moon" /></svg></button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="eyebrow"><span class="dot"></span>CSE Student · Class of 2027</div>
+      <h1>Hi, I'm <span>Amogh Talawar</span></h1>
+      <div class="roles" id="roles" aria-live="off"></div>
+      <p class="lead" style="margin-top:10px">I build intelligent systems across the stack: from real 5G radio hardware and Kubernetes edge
+        clusters, to deep learning models and full-stack web platforms. Currently studying Computer Science Engineering
+        at KLE Technological University, Hubballi.</p>
+      <div class="cta">
+        <a class="btn primary" href="#projects">View Projects <svg class="ic"><use href="#i-arrow" /></svg></a>
+        <a class="btn" href="#contact"><svg class="ic"><use href="#i-mail" /></svg> Get in Touch</a>
+      </div>
+      <div class="scroll-hint"><svg class="ic"><use href="#i-down" /></svg> Move your cursor: the terrain responds</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="ic-box"><svg class="ic"><use href="#i-file" /></svg></div>
+          <div><b data-to="2">2</b><small>Conference papers (IET, Springer)</small></div>
+        </div>
+        <div class="stat">
+          <div class="ic-box"><svg class="ic"><use href="#i-target" /></svg></div>
+          <div><b data-to="0.95" data-dec="2" data-suf="%">0.95%</b><small>CER on Kannada handwriting benchmark</small></div>
+        </div>
+        <div class="stat">
+          <div class="ic-box"><svg class="ic"><use href="#i-medal" /></svg></div>
+          <div><b data-to="3" data-pre="Top " data-suf="%">Top 3%</b><small>Kaggle</small></div>
+        </div>
+        <div class="stat">
+          <div class="ic-box"><svg class="ic"><use href="#i-trophy" /></svg></div>
+          <div><b data-to="32" data-suf="nd">32nd</b><small>WiDS Datathon, 1,075+ teams</small></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="about">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-user" /></svg>About</h2>
+      <p class="sub">What I work on</p>
+      <div class="about">
+        <p>I'm a <strong>Computer Science Engineering</strong> student (6th semester, 2027 batch) at KLE Technological
+          University, Hubballi. My work sits where <strong>AI/ML research</strong>, <strong>networked and edge
+            systems</strong>, and <strong>full-stack engineering</strong> meet.</p>
+        <p>I like projects that run on real hardware and real infrastructure: a private 5G standalone testbed, a
+          Kubernetes edge cluster with an OpenStack cloud backup, and a Raspberry Pi 5 vision system. I also enjoy
+          competitive ML, with hackathon finishes and a Kaggle top-3% ranking.</p>
+        <p>I've presented research as an oral presenter at two conferences and led a small team building a home-services
+          platform during an industry internship.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="wrap">
+      <div class="reveal">
+        <h2><svg class="ic"><use href="#i-folder" /></svg>Projects</h2>
+        <p class="sub">Selected work in AI, networking and systems</p>
+        <div class="filters" id="filters">
+          <button class="filter on" data-f="all"><svg class="ic"><use href="#i-grid" /></svg>All</button>
+          <button class="filter" data-f="ai"><svg class="ic"><use href="#i-spark" /></svg>AI / ML</button>
+          <button class="filter" data-f="net"><svg class="ic"><use href="#i-radio" /></svg>Networking</button>
+          <button class="filter" data-f="agents"><svg class="ic"><use href="#i-bot" /></svg>Agents</button>
+          <button class="filter" data-f="edge"><svg class="ic"><use href="#i-cpu" /></svg>Edge & Systems</button>
+        </div>
+      </div>
+      <div class="grid reveal">
+
+        <article class="card" data-cat="net ai edge">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-radio" /></svg></div><span class="tag">5G · Edge · Research</span></div>
+          <h3>Private 5G Testbed with AI Task Offloading</h3>
+          <p>A hardware-based private 5G standalone network with an edge-cloud continuum, used to evaluate intelligent
+            task offloading.</p>
+          <ul>
+            <li>USRP B210 + srsRAN gNB (Band n78, 20 MHz TDD) with an Open5GS core</li>
+            <li>MicroK8s edge running 9 CIFAR-10 inference pods, with an OpenStack cloud backup</li>
+            <li>MILP gateway and DQN scheduler, extended with GNN-based node scoring</li>
+            <li>Testbed results: about 56% lower latency vs. a cloud-only baseline</li>
+          </ul>
+          <div class="chips"><span class="chip">srsRAN</span><span class="chip">Open5GS</span><span
+              class="chip">MicroK8s</span><span class="chip">OpenStack</span><span class="chip">FastAPI</span><span
+              class="chip">PyTorch</span></div>
+        </article>
+
+        <article class="card" data-cat="ai">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-type" /></svg></div><span class="tag">Deep Learning · OCR</span></div>
+          <h3>Kannada Handwritten Word Recognition</h3>
+          <p>CNN–BiLSTM model with multi-head self-attention for recognising Kannada handwritten words.</p>
+          <ul>
+            <li>0.95% CER and 6.09% WER on IIIT-Indic-HW-Words (13,371 test samples)</li>
+            <li>30.5M parameters, CTC loss with adaptive label smoothing, SWA</li>
+            <li>Published and presented at ICRACS 2026</li>
+          </ul>
+          <div class="chips"><span class="chip">PyTorch</span><span class="chip">CTC</span><span
+              class="chip">BiLSTM</span><span class="chip">Attention</span></div>
+        </article>
+
+        <article class="card" data-cat="net">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-network" /></svg></div><span class="tag">Networking · Simulation</span></div>
+          <h3>Dual-Region Hospital Network in ns-3</h3>
+          <p>A simulation of two hospital regions (Bengaluru and Mysuru) with department-level LANs and inter-region
+            routing.</p>
+          <ul>
+            <li>Core plus 7 distribution routers per region: ICU, Radiology, Staff, ERP, Servers, WiFi, Mgmt</li>
+            <li>RIPv2 inside each region, static peering between cores, dual-homed ISP edge</li>
+            <li>Hamming(31,26) UDP transfer, EHR/PACS TCP flows, video, analysed with FlowMonitor and NetAnim</li>
+          </ul>
+          <div class="chips"><span class="chip">ns-3.43</span><span class="chip">C++</span><span
+              class="chip">RIP</span><span class="chip">FlowMonitor</span></div>
+        </article>
+
+        <article class="card" data-cat="ai">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-shield" /></svg></div><span class="tag">NLP · Privacy</span></div>
+          <h3>PHI De-identification Pipeline</h3>
+          <p>Fine-tuned NER pipeline that removes protected health information from clinical text and FHIR R4 records,
+            designed around India's DPDP Act 2023.</p>
+          <ul>
+            <li>Fine-tuned BERT-based NER on Nemotron-PII across 18 PHI categories</li>
+            <li>97.99% recall</li>
+            <li>Reversible pseudonymisation token store and DPDP-style JSONL audit logging</li>
+          </ul>
+          <div class="chips"><span class="chip">Transformers</span><span class="chip">NER</span><span
+              class="chip">FHIR</span><span class="chip">Python</span></div>
+        </article>
+
+        <article class="card" data-cat="agents">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-box" /></svg></div><span class="tag">Agents · Kubernetes</span></div>
+          <h3>KubeNexus AI</h3>
+          <p>Multi-agent Kubernetes observability system built for the ABB Accelerator hackathon.</p>
+          <ul>
+            <li>Behavioral DNA fingerprinting using 168 time-context buckets and cosine similarity</li>
+            <li>3-round adversarial agent debate protocol (LangGraph)</li>
+            <li>One-click incident postmortem generator</li>
+          </ul>
+          <div class="chips"><span class="chip">LangGraph</span><span class="chip">FastAPI</span><span
+              class="chip">React</span><span class="chip">D3.js</span></div>
+        </article>
+
+        <article class="card" data-cat="agents">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-layers" /></svg></div><span class="tag">Agents · Kubernetes</span></div>
+          <h3>NeuroMesh Guardian</h3>
+          <p>Multi-agent causal root-cause-analysis system for industrial Kubernetes pods, using self-deployed simulated
+            microservices.</p>
+          <div class="chips"><span class="chip">Causal RCA</span><span class="chip">Multi-agent</span><span
+              class="chip">Kubernetes</span></div>
+        </article>
+
+        <article class="card" data-cat="edge ai">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-cpu" /></svg></div><span class="tag">Edge AI · Embedded</span></div>
+          <h3>Raspberry Pi 5 Surveillance System</h3>
+          <p>Real-time edge vision system with person detection, tracking, face recognition and a GPIO buzzer alert.</p>
+          <ul>
+            <li>SSD MobileNet V1 (TFLite) person detection with a custom centroid tracker</li>
+            <li>Restricted-zone intrusion detection and dlib face recognition</li>
+          </ul>
+          <div class="chips"><span class="chip">Raspberry Pi 5</span><span class="chip">TFLite</span><span
+              class="chip">OpenCV</span><span class="chip">dlib</span></div>
+        </article>
+
+        <article class="card" data-cat="agents">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-bot" /></svg></div><span class="tag">Agents · Full-stack</span></div>
+          <h3>Agentic Customer Support Escalation Handler</h3>
+          <p>Built in 12 hours: a five-agent LangGraph pipeline (Intake, Classifier, Tier-1, Tier-2, Status Tracker).
+          </p>
+          <ul>
+            <li>TF-IDF + Logistic Regression classifier, 99.46% accuracy on Bitext 27K</li>
+            <li>FastAPI backend, Next.js + Supabase frontend, Groq LLM</li>
+          </ul>
+          <div class="chips"><span class="chip">LangGraph</span><span class="chip">Next.js</span><span
+              class="chip">Supabase</span><span class="chip">Groq</span></div>
+        </article>
+
+        <article class="card" data-cat="ai agents">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-game" /></svg></div><span class="tag">Reinforcement Learning</span></div>
+          <h3>OpenEnv RL Environments</h3>
+          <p>Environments built for the Meta PyTorch Hackathon: an Insurance Claim Denial Appeal Agent and a Job
+            Reviewer. The Job Reviewer scored 0.98 / 0.96 / 0.98 on easy, medium and hard tasks.</p>
+          <div class="chips"><span class="chip">OpenEnv</span><span class="chip">RL</span><span
+              class="chip">PyTorch</span></div>
+        </article>
+
+        <article class="card" data-cat="edge">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-terminal" /></svg></div><span class="tag">Systems · C++</span></div>
+          <h3>Mini File System Simulator</h3>
+          <p>A C++ in-memory file system with a permission model and a shell-style interface.</p>
+          <ul>
+            <li>mkdir, create, write, read, ls, delete, mv, chmod, find, cd, pwd</li>
+          </ul>
+          <div class="chips"><span class="chip">C++17</span><span class="chip">OOP</span><span class="chip">Data
+              Structures</span></div>
+        </article>
+
+        <article class="card" data-cat="net">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-signal" /></svg></div><span class="tag">Wireless · MATLAB</span></div>
+          <h3>5G A3-Event Handoff Simulation</h3>
+          <p>MATLAB simulation of 3GPP A3 event-based handoff for single-UE and 3-UE scenarios, with SINR, packet loss
+            and delay analysis (100% handoff success).</p>
+          <div class="chips"><span class="chip">MATLAB</span><span class="chip">3GPP TS 38.331</span></div>
+        </article>
+
+        <article class="card" data-cat="ai">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-eye" /></svg></div><span class="tag">Computer Vision</span></div>
+          <h3>CIFAR-100 CNN from Scratch</h3>
+          <p>A custom CNN built without pretrained weights under strict academic constraints, reaching 79.07% test
+            accuracy.</p>
+          <div class="chips"><span class="chip">PyTorch</span><span class="chip">EMA</span><span class="chip">Cosine
+              LR</span></div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="publications">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-file" /></svg>Publications & Talks</h2>
+      <p class="sub">Peer-reviewed conference papers, both presented orally</p>
+      <div class="grid">
+        <article class="card">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-file" /></svg></div><span class="tag">ICRACS 2026 · IET / Scopus</span></div>
+          <h3>Kannada Handwritten Word Recognition Using CNN–BiLSTM with Self-Attention</h3>
+          <p>Presented at ICRACS 2026, hosted by Poornima Institute of Engineering & Technology, Jaipur (17–18 April
+            2026).</p>
+        </article>
+        <article class="card">
+          <div class="card-head"><div class="ic-box"><svg class="ic"><use href="#i-file" /></svg></div><span class="tag">ICAN 2026 · Springer Nature</span></div>
+          <h3>Intelligent Task Offloading in 5G-Enabled Edge Cloud Continuum: A Hybrid MILP and Deep Q-Learning Approach
+          </h3>
+          <p>Presented at ICAN 2026 (Chitkara). Built and evaluated on a real private 5G hardware testbed.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-briefcase" /></svg>Experience & Achievements</h2>
+      <p class="sub">Internship, competitions and rankings</p>
+      <div class="timeline" id="timeline">
+        <div class="tl-item">
+          <span class="tl-ic"><svg class="ic"><use href="#i-briefcase" /></svg></span>
+          <h3>Team Lead Intern, Athreya Technology</h3>
+          <div class="meta">NestFix: home-services platform</div>
+          <p>Led the development of a full-stack home-services platform using React, Node.js and MySQL.</p>
+        </div>
+        <div class="tl-item">
+          <span class="tl-ic"><svg class="ic"><use href="#i-trophy" /></svg></span>
+          <h3>WiDS Datathon: 32nd globally</h3>
+          <div class="meta">1,075+ teams</div>
+          <p>Top-tier finish in an international data science competition.</p>
+        </div>
+        <div class="tl-item">
+          <span class="tl-ic"><svg class="ic"><use href="#i-medal" /></svg></span>
+          <h3>2nd Place, Deshpande Hackathon</h3>
+          <div class="meta">Hackathon prize</div>
+          <p>Placed second in the Deshpande Hackathon.</p>
+        </div>
+        <div class="tl-item">
+          <span class="tl-ic"><svg class="ic"><use href="#i-target" /></svg></span>
+          <h3>Kaggle: Top 3%</h3>
+          <div class="meta">Competitive ML</div>
+          <p>Ranked in the top 3% on Kaggle.</p>
+        </div>
+        <div class="tl-item">
+          <span class="tl-ic"><svg class="ic"><use href="#i-grad" /></svg></span>
+          <h3>B.E. Computer Science & Engineering</h3>
+          <div class="meta">KLE Technological University, Hubballi · Graduating 2027</div>
+          <p>Focus areas: machine learning, computer networks, cloud and distributed systems.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-code" /></svg>Skills</h2>
+      <p class="sub">Tools I work with</p>
+      <div class="skills">
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-spark" /></svg></span>AI / ML</h3>
+          <div class="chips"><span class="chip">PyTorch</span><span class="chip">Deep Learning</span><span
+              class="chip">CNN / BiLSTM</span><span class="chip">Transformers</span><span class="chip">Reinforcement
+              Learning</span><span class="chip">LangGraph</span><span class="chip">GNN</span></div>
+        </div>
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-radio" /></svg></span>Networking & 5G</h3>
+          <div class="chips"><span class="chip">srsRAN</span><span class="chip">Open5GS</span><span class="chip">USRP
+              SDR</span><span class="chip">ns-3</span><span class="chip">RIP / Routing</span><span
+              class="chip">MATLAB</span></div>
+        </div>
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-cloud" /></svg></span>Cloud & DevOps</h3>
+          <div class="chips"><span class="chip">Kubernetes</span><span class="chip">MicroK8s</span><span
+              class="chip">OpenStack</span><span class="chip">Docker</span><span class="chip">AWS (learning)</span>
+          </div>
+        </div>
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-layers" /></svg></span>Full-Stack</h3>
+          <div class="chips"><span class="chip">React</span><span class="chip">Next.js</span><span
+              class="chip">Node.js</span><span class="chip">FastAPI</span><span class="chip">MySQL</span><span
+              class="chip">Supabase</span></div>
+        </div>
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-terminal" /></svg></span>Languages</h3>
+          <div class="chips"><span class="chip">Python</span><span class="chip">C++</span><span
+              class="chip">C</span><span class="chip">JavaScript</span><span class="chip">SQL</span><span
+              class="chip">LaTeX</span></div>
+        </div>
+        <div class="skill-box">
+          <h3><span class="ic-box"><svg class="ic"><use href="#i-cpu" /></svg></span>Embedded & Edge</h3>
+          <div class="chips"><span class="chip">Raspberry Pi 5</span><span class="chip">TFLite</span><span
+              class="chip">OpenCV</span><span class="chip">GPIO</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-mail" /></svg>Let's Connect</h2>
+      <p>I'm open to internships and collaborations in AI/ML, 5G/edge systems and full-stack engineering.</p>
+      <div class="cta" style="justify-content:center">
+        <a class="btn primary" href="mailto:princeamogh7@gmail.com"><svg class="ic"><use href="#i-mail" /></svg> Email Me</a>
+        <button class="btn" id="copy-mail" type="button"><svg class="ic"><use href="#i-copy" /></svg> Copy Email</button>
+        <a class="btn" href="https://github.com/AmoghTalawar" target="_blank" rel="noopener"><svg class="ic"><use href="#i-github" /></svg> GitHub</a>
+        <a class="btn" href="https://www.linkedin.com/in/amogh-talawar-769865319" target="_blank"
+          rel="noopener"><svg class="ic"><use href="#i-linkedin" /></svg> LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="message">
+    <div class="wrap reveal">
+      <h2><svg class="ic"><use href="#i-send" /></svg>Send a Message</h2>
+      <p class="sub">Leave a note and I'll get back to you.</p>
+      <form id="contact-form" style="display:grid;gap:12px;max-width:560px">
+        <input class="field" name="name" placeholder="Your name" required maxlength="100">
+        <input class="field" name="email" type="email" placeholder="Your email" required maxlength="254">
+        <textarea class="field" name="message" rows="5" placeholder="Your message" required maxlength="1000"></textarea>
+        <div class="count" id="count">0 / 1000</div>
+        <!-- honeypot: hidden from real users, bots often fill it -->
+        <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+        <button class="btn primary" type="submit" style="justify-content:center;border:none"><svg class="ic"><use href="#i-send" /></svg> Send</button>
+        <p id="form-status" style="color:var(--muted)"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">© 2026 Amogh Talawar · Built with HTML & CSS, hosted on AWS</div>
+  </footer>
+
+  <div id="hud">x <b id="hx">0</b> · y <b id="hy">0</b> · elev <b id="he">0</b> m</div>
+  <button id="top-btn" aria-label="Back to top"><svg class="ic"><use href="#i-up" /></svg></button>
+  <div id="toast"><svg class="ic"><use href="#i-check" /></svg><span id="toast-t"></span></div>
+
+  <script>
+    const API_URL = "https://8zrznsk3a2.execute-api.ap-south-1.amazonaws.com/messages";
+    document.getElementById("contact-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = document.getElementById("form-status");
+      const data = Object.fromEntries(new FormData(e.target));
+      status.textContent = "Sending...";
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const out = await res.json();
+        status.textContent = out.message;
+        if (res.ok) { e.target.reset(); updateCount(); }
+      } catch (err) {
+        status.textContent = "Something went wrong. Please try again.";
+      }
+    });
+
+    /* ---------- helpers ---------- */
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const rootEl = document.documentElement;
+
+    function toast(msg) {
+      $("#toast-t").textContent = msg;
+      $("#toast").classList.add("show");
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => $("#toast").classList.remove("show"), 2000);
+    }
+
+    /* ---------- theme toggle (persisted) ---------- */
+    try { const s = localStorage.getItem("theme"); if (s) rootEl.dataset.theme = s; } catch (e) { }
+    $("#theme").addEventListener("click", () => {
+      const isLight = getComputedStyle(rootEl).getPropertyValue("--bg").trim() === "#f6f8fc";
+      const next = isLight ? "dark" : "light";
+      rootEl.dataset.theme = next;
+      try { localStorage.setItem("theme", next); } catch (e) { }
+      readColors();
+    });
+
+    /* ---------- topographic contour animation ---------- */
+    const cv = $("#topo"), ctx = cv.getContext("2d");
+    const CELL = 18, LEVELS = 14;
+    let W, H, cols, rows, field, dpr, rgb1 = "94,234,212", rgb2 = "129,140,248";
+    const mouse = { x: -9999, y: -9999, sx: -9999, sy: -9999 };
+
+    function readColors() {
+      const cs = getComputedStyle(rootEl);
+      rgb1 = cs.getPropertyValue("--topo").trim();
+      rgb2 = cs.getPropertyValue("--topo2").trim();
+    }
+
+    function resize() {
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      W = innerWidth; H = innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(W / CELL) + 2; rows = Math.ceil(H / CELL) + 2;
+      field = new Float32Array(cols * rows);
+    }
+
+    // elevation 0..1 at pixel (px,py), time t, scroll offset so
+    function elevation(px, py, t, so) {
+      const x = px * 0.0075, y = (py + so) * 0.0075;
+      let v = 0.5
+        + 0.24 * Math.sin(x * 1.3 + t * 0.55 + Math.sin(y * 1.1 - t * 0.35) * 1.7)
+        + 0.2 * Math.sin(y * 1.7 - t * 0.45 + Math.cos(x * 0.9 + t * 0.3) * 1.5)
+        + 0.12 * Math.sin((x + y) * 1.1 + t * 0.25);
+      const dx = px - mouse.sx, dy = py - mouse.sy;
+      v += 0.36 * Math.exp(-(dx * dx + dy * dy) / 52000); // cursor "hill"
+      return v;
+    }
+
+    // marching-squares segment table: edges 0=top 1=right 2=bottom 3=left
+    const SEG = [[], [[3, 2]], [[2, 1]], [[3, 1]], [[0, 1]], [[3, 0], [2, 1]], [[0, 2]], [[3, 0]],
+      [[3, 0]], [[0, 2]], [[0, 1], [3, 2]], [[0, 1]], [[3, 1]], [[2, 1]], [[3, 2]], []];
+
+    function draw(t) {
+      const so = scrollY * 0.35;
+      for (let j = 0; j < rows; j++)
+        for (let i = 0; i < cols; i++) field[j * cols + i] = elevation(i * CELL, j * CELL, t, so);
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.lineCap = "round";
+      for (let l = 0; l < LEVELS; l++) {
+        const lv = 0.2 + (l / LEVELS) * 0.95;
+        const major = l % 4 === 0;
+        ctx.strokeStyle = `rgba(${major ? rgb1 : rgb2},${major ? 0.5 : 0.22})`;
+        ctx.lineWidth = major ? 1.5 : 0.8;
+        ctx.beginPath();
+        for (let j = 0; j < rows - 1; j++) {
+          for (let i = 0; i < cols - 1; i++) {
+            const a = field[j * cols + i], b = field[j * cols + i + 1],
+              c = field[(j + 1) * cols + i + 1], d = field[(j + 1) * cols + i];
+            const idx = (a > lv ? 8 : 0) | (b > lv ? 4 : 0) | (c > lv ? 2 : 0) | (d > lv ? 1 : 0);
+            if (idx === 0 || idx === 15) continue;
+            const x0 = i * CELL, y0 = j * CELL;
+            const pt = (e) => {
+              switch (e) {
+                case 0: return [x0 + CELL * (lv - a) / (b - a), y0];
+                case 1: return [x0 + CELL, y0 + CELL * (lv - b) / (c - b)];
+                case 2: return [x0 + CELL * (lv - d) / (c - d), y0 + CELL];
+                default: return [x0, y0 + CELL * (lv - a) / (d - a)];
+              }
+            };
+            for (const [e1, e2] of SEG[idx]) {
+              const p = pt(e1), q = pt(e2);
+              ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]);
+            }
+          }
+        }
+        ctx.stroke();
+      }
+    }
+
+    let t0 = performance.now(), running = true, last = 0;
+    function loop(now) {
+      if (!running) return;
+      requestAnimationFrame(loop);
+      if (now - last < 33) return; // ~30fps keeps it light
+      last = now;
+      mouse.sx += (mouse.x - mouse.sx) * 0.12;
+      mouse.sy += (mouse.y - mouse.sy) * 0.12;
+      draw((now - t0) / 1000);
+    }
+    readColors(); resize();
+    addEventListener("resize", () => { resize(); if (reduce) draw(0); });
+    if (reduce) draw(0); else requestAnimationFrame(loop);
+    document.addEventListener("visibilitychange", () => {
+      const was = running;
+      running = !document.hidden && !reduce;
+      if (running && !was) requestAnimationFrame(loop);
+    });
+
+    /* HUD: live cursor elevation readout */
+    const hx = $("#hx"), hy = $("#hy"), he = $("#he");
+    addEventListener("pointermove", (e) => {
+      mouse.x = e.clientX; mouse.y = e.clientY;
+      if (mouse.sx < -999) { mouse.sx = mouse.x; mouse.sy = mouse.y; }
+      hx.textContent = Math.round(e.clientX);
+      hy.textContent = Math.round(e.clientY + scrollY);
+      he.textContent = Math.round(elevation(e.clientX, e.clientY, (performance.now() - t0) / 1000, scrollY * 0.35) * 1000);
+    }, { passive: true });
+
+    /* ---------- scroll progress, back-to-top, timeline fill ---------- */
+    const bar = $("#progress"), topBtn = $("#top-btn"), tl = $("#timeline");
+    function onScroll() {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = (max > 0 ? scrollY / max * 100 : 0) + "%";
+      topBtn.classList.toggle("show", scrollY > 500);
+      const r = tl.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (innerHeight * 0.65 - r.top) / r.height));
+      tl.style.setProperty("--tl", p * 100 + "%");
+    }
+    addEventListener("scroll", onScroll, { passive: true }); onScroll();
+    topBtn.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+
+    /* ---------- scroll reveal + active nav ---------- */
+    const io = new IntersectionObserver((es) => es.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    }), { threshold: 0.08 });
+    $$(".reveal").forEach(el => io.observe(el));
+
+    const links = $$("nav ul a[href^='#']");
+    const spy = new IntersectionObserver((es) => es.forEach(en => {
+      if (en.isIntersecting) links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id));
+    }), { rootMargin: "-45% 0px -50% 0px" });
+    $$("section[id]").forEach(s => spy.observe(s));
+
+    /* ---------- count-up stats ---------- */
+    const cio = new IntersectionObserver((es) => es.forEach(en => {
+      if (!en.isIntersecting) return;
+      cio.unobserve(en.target);
+      const el = en.target, to = +el.dataset.to, dec = +(el.dataset.dec || 0);
+      const pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+      if (reduce) return;
+      const start = performance.now(), dur = 1400;
+      (function step(n) {
+        const k = Math.min(1, (n - start) / dur), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = pre + (to * e).toFixed(dec) + suf;
+        if (k < 1) requestAnimationFrame(step);
+      })(start);
+    }), { threshold: 0.6 });
+    $$("[data-to]").forEach(el => cio.observe(el));
+
+    /* ---------- rotating role typewriter ---------- */
+    const roles = ["AI / ML researcher", "5G & edge systems builder", "Full-stack engineer", "Kubernetes tinkerer"];
+    const rEl = $("#roles");
+    if (reduce) rEl.textContent = roles[0];
+    else {
+      let ri = 0, ci = 0, del = false;
+      (function type() {
+        const w = roles[ri];
+        rEl.textContent = w.slice(0, ci);
+        if (!del && ci === w.length) { del = true; return setTimeout(type, 1500); }
+        if (del && ci === 0) { del = false; ri = (ri + 1) % roles.length; }
+        ci += del ? -1 : 1;
+        setTimeout(type, del ? 35 : 75);
+      })();
+    }
+
+    /* ---------- card spotlight + 3D tilt ---------- */
+    $$(".card").forEach(c => {
+      c.addEventListener("pointermove", (e) => {
+        const r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        c.style.setProperty("--mx", x + "px"); c.style.setProperty("--my", y + "px");
+        if (!reduce && e.pointerType === "mouse")
+          c.style.transform = `rotateX(${((y / r.height) - .5) * -5}deg) rotateY(${((x / r.width) - .5) * 5}deg) translateY(-3px)`;
+      });
+      c.addEventListener("pointerleave", () => { c.style.transform = ""; });
+    });
+
+    /* ---------- project filters ---------- */
+    $("#filters").addEventListener("click", (e) => {
+      const b = e.target.closest(".filter"); if (!b) return;
+      $$(".filter").forEach(x => x.classList.toggle("on", x === b));
+      const f = b.dataset.f;
+      $$("#projects .card").forEach(c => c.classList.toggle("hide", f !== "all" && !c.dataset.cat.split(" ").includes(f)));
+    });
+
+    /* ---------- button ripple ---------- */
+    $$(".btn").forEach(b => b.addEventListener("click", (e) => {
+      const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height) / 4;
+      const sp = document.createElement("span");
+      sp.className = "ripple";
+      sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+      b.appendChild(sp); setTimeout(() => sp.remove(), 600);
+    }));
+
+    /* ---------- copy email ---------- */
+    $("#copy-mail").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText("princeamogh7@gmail.com"); toast("Email copied to clipboard"); }
+      catch (e) { toast("princeamogh7@gmail.com"); }
+    });
+
+    /* ---------- message counter ---------- */
+    const ta = $("#contact-form textarea");
+    function updateCount() { $("#count").textContent = ta.value.length + " / 1000"; }
+    ta.addEventListener("input", updateCount);
+  </script>
+</body>
+
+</html>

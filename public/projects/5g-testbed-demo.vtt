@@ -1,0 +1,124 @@
+WEBVTT
+
+00:00:00.400 --> 00:00:06.038
+This is our Intelligent Task Offloading project, and this white box is the USRP
+
+00:00:06.038 --> 00:00:07.180
+radio behind it.
+
+00:00:08.600 --> 00:00:12.438
+First we start the base station using srsRAN.
+
+00:00:12.438 --> 00:00:18.580
+It detects the radio, comes up on band n78, and connects to the 5G core.
+
+00:00:19.600 --> 00:00:23.089
+Then we check the core network, which is Open5GS.
+
+00:00:23.089 --> 00:00:28.714
+Every service here, like the AMF for access and the UPF that carries user data,
+
+00:00:28.714 --> 00:00:32.060
+shows active and running, so the core is ready.
+
+00:00:33.600 --> 00:00:34.943
+Now the edge layer.
+
+00:00:34.943 --> 00:00:40.882
+Kubernetes is running nine edge nodes plus a scheduler, and each one serves an image
+
+00:00:40.882 --> 00:00:41.660
+classifier.
+
+00:00:42.400 --> 00:00:43.944
+This next one's the gateway.
+
+00:00:43.944 --> 00:00:47.750
+It's the brain of the system, it decides where every task should run.
+
+00:00:48.400 --> 00:00:52.786
+And this server tracks live throughput, because the best choice depends on how much
+
+00:00:52.786 --> 00:00:56.380
+bandwidth we've got right now, and that keeps changing all the time.
+
+00:00:57.600 --> 00:01:02.521
+Over on the cloud side, we've got a FastAPI service in Docker, which acts as a
+
+00:01:02.521 --> 00:01:04.982
+backup whenever the edge is overloaded.
+
+00:01:04.982 --> 00:01:10.218
+And finally, this Node server stores the results, so we can use them for retraining
+
+00:01:10.218 --> 00:01:11.480
+the models later on.
+
+00:01:12.600 --> 00:01:14.675
+Now let's look at the user side.
+
+00:01:14.675 --> 00:01:19.927
+This phone has our programmable SIM, so it isn't on a normal mobile network, it's
+
+00:01:19.927 --> 00:01:22.001
+connected to our own private 5G.
+
+00:01:22.001 --> 00:01:26.151
+Think of it as our own small mobile operator, just for this lab.
+
+00:01:26.151 --> 00:01:31.597
+We open the browser and run a search, and the results load, which tells us real data
+
+00:01:31.597 --> 00:01:36.460
+is moving all the way through the radio, the core, and out to the internet.
+
+00:01:38.400 --> 00:01:40.403
+Okay, now for the actual test.
+
+00:01:40.403 --> 00:01:45.876
+From the laptop, we send a picture to the gateway as a classification request, and
+
+00:01:45.876 --> 00:01:51.350
+the system has to work out where that job should run, at the edge or in the cloud.
+
+00:01:53.000 --> 00:01:56.144
+The gateway runs an optimization called MILP.
+
+00:01:56.144 --> 00:02:01.804
+It looks at node load, bandwidth and the deadline, then picks the option with the
+
+00:02:01.804 --> 00:02:03.830
+lowest latency for that task.
+
+00:02:04.800 --> 00:02:07.600
+And here's the answer, right in the response.
+
+00:02:07.600 --> 00:02:12.764
+It chose edge node two, because that has the lowest latency and still meets the one
+
+00:02:12.764 --> 00:02:13.760
+second deadline.
+
+00:02:14.400 --> 00:02:21.861
+It estimates about 0.93 seconds at the edge, against 1.83 in the cloud, so the edge
+
+00:02:21.861 --> 00:02:22.940
+wins easily.
+
+00:02:23.600 --> 00:02:27.530
+The model looked at the picture and said it's a dog, which is right.
+
+00:02:27.530 --> 00:02:32.212
+And now, over here on the storage server, you can see the file arriving, with its
+
+00:02:32.212 --> 00:02:33.830
+name right there in the log.
+
+00:02:35.600 --> 00:02:40.559
+We open the uploads folder, and there's our picture, exactly as we sent it.
+
+00:02:40.559 --> 00:02:45.848
+In our testing, this approach cut latency by about 56 percent, compared to using
+
+00:02:45.848 --> 00:02:46.840
+only the cloud.

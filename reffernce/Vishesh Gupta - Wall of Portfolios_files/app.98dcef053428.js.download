@@ -1,0 +1,959 @@
+// =================== APP (Main Application) ===================
+// Uses modules: core.js, modals.js, auth.js, messaging.js
+(() => {
+  // Import core utilities
+  const { qs, qsa, show, hide, toggle, remove, debounce, getCookie, escapeHtml, timeAgo, isLoggedIn, onReady, isAppScrollNearBottom, onAppScroll, BOOKMARK_TOGGLE_URL, CASESTUDY_BOOKMARK_TOGGLE_URL } = window.CoreUtils || {};
+
+  // ===== PROFILE DROPDOWN =====
+  function initProfileDropdown() {
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu  = document.getElementById("dropdownMenu");
+    if (!(profileToggle && dropdownMenu)) return;
+
+    const closeProfile = () => {
+      remove(dropdownMenu, "show");
+      profileToggle.setAttribute("aria-expanded", "false");
+    };
+
+    profileToggle.setAttribute("aria-haspopup", "true");
+    profileToggle.setAttribute("aria-expanded", "false");
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggle(dropdownMenu, "show");
+      const open = dropdownMenu.classList.contains("show");
+      profileToggle.setAttribute("aria-expanded", String(open));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdownMenu.contains(e.target) && e.target !== profileToggle) closeProfile();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeProfile();
+    });
+  }
+
+  // ===== NOTIFICATION DROPDOWN =====
+  const API = {
+    unreadList: "/notifications/unread/",       // paginated
+    unreadCount: "/notifications/unread_count/",
+    badgeCount: "/notifications/badge_count/",
+    seen: "/notifications/seen/",
+    markRead: (id) => `/notifications/${id}/mark_read/`
+  };
+  
+  let badgeCount = 0;
+  let nextUrl = null;       // next page URL from DRF
+  let loading = false;
+  let isOpen = false;
+  let observer = null;
+  
+  async function fetchJSON(url, opts={}){
+    const res = await fetch(url, {
+      credentials: "same-origin",
+      headers: { "Accept":"application/json", ...(opts.headers||{}) },
+      ...opts
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+  
+  function updateBadge(count){
+    const badge = document.getElementById("notificationBadge");
+    if (!badge) return;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? "inline-block" : "none";
+  }
+
+  async function refreshBadge(){
+    try { const {count} = await fetchJSON(API.badgeCount); updateBadge(count); }
+    catch(e){ console.warn("badge_count failed", e); }
+  }
+
+  async function markSeenNow(){
+    try {
+      await fetchJSON(API.seen, { method:"POST", credentials: "same-origin", headers:{ "Accept": "application/json","X-Requested-With":"XMLHttpRequest","X-CSRFToken": getCookie("csrftoken") }});
+      updateBadge(0); // optimistic; server cookie makes it stick after refresh
+    } catch(e){ console.warn("seen failed", e); }
+  }
+  
+  async function refreshUnreadCount(){
+    try{
+      const {count} = await fetchJSON(API.unreadCount);
+      updateBadge(count);
+    }catch(e){ console.warn("unread_count failed", e); }
+  }
+  
+  // ===== MESSAGE BADGE (for inbox/messages icon) =====
+  function updateMessageBadge(count){
+    const badge = document.getElementById("messageBadge");
+    if (!badge) return;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? "inline-flex" : "none";
+  }
+
+  async function refreshMessageBadge(){
+    try {
+      const {count} = await fetchJSON('/api/messages/unread-count/');
+      updateMessageBadge(count);
+    } catch(e) { 
+      // User might not be logged in, or API doesn't exist
+      console.warn("message unread_count failed", e); 
+    }
+  }
+  
+  // Expose globally for messaging module to update
+  window.updateMessageBadge = updateMessageBadge;
+  window.refreshMessageBadge = refreshMessageBadge;
+  
+  // ===== GLOBAL NAVBAR WEBSOCKET =====
+  // Lightweight WebSocket connection for real-time navbar updates (messages + notifications)
+  let navbarSocket = null;
+  let navbarReconnectAttempts = 0;
+  const NAVBAR_MAX_RECONNECT = 5;
+  const NAVBAR_RECONNECT_DELAY = 5000;
+  
+  function connectNavbarWebSocket() {
+    // Only connect if user is logged in
+    if (!document.body?.dataset?.auth || document.body.dataset.auth !== '1') return;
+    
+    // Don't connect if already connected
+    if (navbarSocket && navbarSocket.readyState === WebSocket.OPEN) return;
+    
+    // Don't connect if we're on the inbox page (messaging.js handles its own WebSocket)
+    if (document.getElementById('chat-lists')) return;
+    
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/chat/`;
+    
+    try {
+      navbarSocket = new WebSocket(wsUrl);
+      
+      navbarSocket.onopen = function() {
+        navbarReconnectAttempts = 0;
+      };
+      
+      navbarSocket.onmessage = function(e) {
+        try {
+          const data = JSON.parse(e.data);
+          handleNavbarWebSocketMessage(data);
+        } catch (err) {
+          console.warn('Navbar WebSocket message parse error:', err);
+        }
+      };
+      
+      navbarSocket.onclose = function() {
+        // Attempt to reconnect
+        if (navbarReconnectAttempts < NAVBAR_MAX_RECONNECT) {
+          navbarReconnectAttempts++;
+          setTimeout(connectNavbarWebSocket, NAVBAR_RECONNECT_DELAY);
+        }
+      };
+      
+      navbarSocket.onerror = function(err) {
+        console.warn('Navbar WebSocket error:', err);
+      };
+    } catch (err) {
+      console.warn('Failed to create Navbar WebSocket:', err);
+    }
+  }
+  
+  function handleNavbarWebSocketMessage(data) {
+    switch (data.type) {
+      case 'new_message':
+        // New message received - update message badge
+        refreshMessageBadge();
+        break;
+        
+      case 'notification':
+        // Handle different notification types
+        if (data.notification_type === 'new_request') {
+          // New chat request - update message badge
+          refreshMessageBadge();
+        }
+        // Also refresh notification badge for any notification
+        refreshBadge();
+        break;
+        
+      case 'conversation_update':
+        // Conversation updated - refresh message badge
+        refreshMessageBadge();
+        break;
+        
+      case 'badge_update':
+        // Direct badge update from server
+        if (data.message_count !== undefined) {
+          updateMessageBadge(data.message_count);
+        }
+        if (data.notification_count !== undefined) {
+          updateBadge(data.notification_count);
+        }
+        break;
+        
+      case 'pong':
+      case 'connection_established':
+        // Keep-alive and connection confirmation - no action needed
+        break;
+    }
+  }
+  
+  // Expose for other modules
+  window.connectNavbarWebSocket = connectNavbarWebSocket;
+  
+  function renderItem(n){
+    const actor = (n.data && n.data.actor) || {};
+    const name  = actor.name || "Someone";
+    const avatar= actor.avatar || (window.STATIC_URLS && window.STATIC_URLS['default-avatar']) || (window.STATIC_URL + 'images/defaultavatar.svg');
+    // your redirect target (requirement: go to analytics)
+    const href  = n.data.url || "/profile/analytics/";
+    const title = n.title || `${name} has bookmarked your portfolio`;
+    return n.data.notificationItemTemplate || `
+      <a href="${href}" class="notif-item link-block-16 w-inline-block p-5 w100 boderb"
+         data-id="${n.id}" data-href="${href}" style="background-color: ${n.is_read ? '#fff' : '#f2f6ff'};" onmouseover="this.style.backgroundColor='#F7F7F7'" onmouseout="this.style.backgroundColor='${n.is_read ? '#fff' : '#f2f6ff'}'">
+        <div class="w-layout-vflex">
+          <div class="w-layout-hflex gap16">
+            <img src="${escapeHtml(avatar)}" alt="Profile" class="dp24sm" />
+            <div class="w-layout-vflex gap4">
+              <p class="lm2 text-grey400">${escapeHtml(title)}</p>
+              <p class="ls3 text-grey200 lowercasetext">${timeAgo(n.created_at)}</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+  }
+  
+  function emptyState(){
+    const staticUrl = document.getElementById("notificationMenu").dataset.staticUrl;
+    return `<div class="p-5 text-grey300">
+            <div class="w-layout-vflex flex-wrap-center pb-10">
+              <img src="${staticUrl}" loading="lazy" class="dp80x">
+              <h1 class="llg text-grey400 textalignc pt-3">Nothing to see here… yet.</h1>
+              <p class="p1 text-grey200 textalignc pt-3 px-5">We'll let you know when there's something new</p>
+            </div>
+    </div>`;
+  }
+  
+  function appendList(results){
+    const list = document.getElementById("notificationList");
+    if(!list) return;
+    if ((!results || results.length===0) && !list.hasChildNodes()){
+      list.innerHTML = emptyState();
+      return;
+    }
+    if (results && results.length){
+      list.insertAdjacentHTML("beforeend", results.map(renderItem).join(""));
+    }
+  }
+  
+  async function loadNextPage(){
+    if(loading || !nextUrl || !isOpen) return;
+    loading = true;
+    try{
+      const data = await fetchJSON(nextUrl);
+      appendList(data.results || []);
+      nextUrl = data.next || null;
+    }catch(e){ console.warn("loadNextPage failed", e); }
+    loading = false;
+  }
+  
+  async function loadFirstPage(){
+    const list = document.getElementById("notificationList");
+    if(list) list.innerHTML = "";              // reset each open
+    nextUrl = API.unreadList;                  // start at unread page 1
+    await loadNextPage();                      // fetch first page
+  }
+  
+  async function markReadAndGo(id, href, anchorEl){
+    // mark read (don't block forever)
+    try{
+      await fetchJSON(API.markRead(id), {
+        method:"POST",
+        headers:{ "Accept": "application/json","X-Requested-With":"XMLHttpRequest","X-CSRFToken": getCookie("csrftoken") }
+      });
+      // update UI instantly
+      if (anchorEl) anchorEl.remove();
+      updateBadge(badgeCount - 1);
+      // if list empty, show empty state
+      const list = document.getElementById("notificationList");
+      if (list && !list.hasChildNodes()) list.innerHTML = emptyState();
+    }catch(e){
+      console.warn("mark_read failed", e);
+      // even if it fails, we can still navigate; server-side will keep it unread
+    }finally{
+      window.location.href = href;
+    }
+  }
+  
+  function attachDelegatedClick(){
+    const list = document.getElementById("notificationList");
+    if(!list) return;
+    list.addEventListener("click", (e)=>{
+      const a = e.target.closest(".notif-item");
+      if(!a) return;
+      e.preventDefault();
+      const id = a.getAttribute("data-id");
+      const href = a.getAttribute("data-href") || "/profile/analytics/";
+      // use keepalive? not needed if we await then navigate; for extra safety set a timeout
+      markReadAndGo(id, href, a);
+    });
+  }
+  
+  function setupObserver(){
+    const sentinel = document.getElementById("notifSentinel");
+    if (!sentinel) return;
+    if (observer) { observer.disconnect(); observer = null; }
+    observer = new IntersectionObserver((entries)=>{
+      for(const entry of entries){
+        if(entry.isIntersecting){
+          loadNextPage();
+        }
+      }
+    }, { root: document.getElementById("notificationMenu"), rootMargin: "0px 0px 200px 0px" });
+    observer.observe(sentinel);
+  }
+  
+  function teardownObserver(){
+    if(observer){ observer.disconnect(); observer = null; }
+  }
+  
+  function initNotificationDropdown(){
+    const toggle = document.getElementById("notificationToggle");
+    const menu   = document.getElementById("notificationMenu");
+    if(!(toggle && menu)) return;
+  
+    // initial states
+    menu.classList.remove("show");
+    toggle.setAttribute("aria-haspopup","true");
+    toggle.setAttribute("aria-expanded","false");
+  
+    // live badge (and optional polling)
+    // refreshUnreadCount();
+    // setInterval(refreshUnreadCount, 60000);
+  
+    attachDelegatedClick();
+  
+    toggle.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const willOpen = !menu.classList.contains("show");
+      menu.classList.toggle("show");
+      isOpen = willOpen;
+      toggle.setAttribute("aria-expanded", String(willOpen));
+  
+      // close other dropdowns if any
+      const profileMenu = document.getElementById("dropdownMenu");
+      if (willOpen && profileMenu) profileMenu.classList.remove("show");
+  
+      if (willOpen){
+        await loadFirstPage();     // fetch page 1 (UNREAD)
+        setupObserver();           // start infinite scroll
+        markSeenNow();
+      } else {
+        teardownObserver();        // stop loading in background
+      }
+    });
+  
+    // outside click
+    document.addEventListener("click", (e)=>{
+      if(!menu.contains(e.target) && e.target !== toggle){
+        menu.classList.remove("show");
+        isOpen = false;
+        toggle.setAttribute("aria-expanded","false");
+        teardownObserver();
+      }
+    });
+  
+    // esc
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape"){
+        menu.classList.remove("show");
+        isOpen = false;
+        toggle.setAttribute("aria-expanded","false");
+        teardownObserver();
+      }
+    });
+    refreshBadge();
+    // setInterval(refreshBadge, 30000);
+  }
+
+  // ===== OPTIONAL: STORY TOGGLE =====
+  function initPtmStoryToggle() {
+    qsa(".story_blocks").forEach((block) => {
+      block.addEventListener("click", function () {
+        const rank = this.getAttribute("data-rank");
+        qsa(".ptm_story_cards").forEach((c) => (c.style.display = "none"));
+        const match = qs(`.ptm_story_cards[data-rank="${rank}"]`);
+        if (match) match.style.display = "block";
+      });
+    });
+  }
+
+  // ===== SHOW MORE/LESS IN FILTER SECTIONS =====
+  function initShowMoreLess() {
+    qsa(".filter_sections").forEach((section) => {
+      const moreOptions = qs(".more_options", section);
+      const showMore = qs(".show-more", section);
+      const showLess = qs(".show-less", section);
+      if (!(moreOptions && showMore && showLess)) return;
+
+      hide(moreOptions); show(showMore, "inline-block"); hide(showLess);
+
+      showMore.addEventListener("click", (e) => {
+        e.preventDefault();
+        show(moreOptions, "grid"); hide(showMore); show(showLess, "inline-block");
+      });
+      showLess.addEventListener("click", (e) => {
+        e.preventDefault();
+        hide(moreOptions); show(showMore, "inline-block"); hide(showLess);
+      });
+    });
+  }
+
+  // ===== FINSWEET COUNT BUBBLE (if present) =====
+  function initFinsweetCountBubble() {
+    window.fsAttributes = window.fsAttributes || [];
+    window.fsAttributes.push([
+      "cmsfilter",
+      (instances) => {
+        const [filter] = instances || [];
+        if (!filter?.listInstance) return;
+        filter.listInstance.on("renderitems", () => {
+          const form = qs('form[fs-cmsfilter-element="filters"]');
+          if (!form) return;
+          let count = qsa('input[type="checkbox"]:checked', form).length + qsa('input[type="radio"]:checked', form).length;
+          qsa("select", form).forEach((s)=>{ if (s.value) count++; });
+          // Adjust if you have a default-selected radio that should not count
+          count = Math.max(0, count - 1);
+          const bubble = qs(".count_bubble");
+          if (bubble) {
+            bubble.textContent = count;
+            bubble.style.display = count > 0 ? "inline-block" : "none";
+          }
+        });
+      }
+    ]);
+  }
+
+  // ===== CUSTOM EMPTY STATE OBSERVER =====
+  function initCustomEmptyStateObserver() {
+    // People tab empty state
+    const peopleList = qs('#people-cards-container');
+    const peopleEmptyState = qs(".custom-empty-state");
+    
+    // Work tab empty state  
+    const workList = qs('#work-cards-container');
+    const workEmptyState = qs(".work-empty-state");
+
+    // Generic pages (bookmarks, etc.) - Main cards container
+    const mainList = qs('#cards-container');
+    const mainEmptyState = qs(".custom-empty-state");
+
+    const checkPeopleEmpty = () => {
+      if (!peopleList || !peopleEmptyState) return;
+      const items = qsa(".w-dyn-item", peopleList);
+      const visible = items.filter((it) => {
+        const cs = window.getComputedStyle(it);
+        return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+      }).length;
+      (visible === 0) ? show(peopleEmptyState, "flex") : hide(peopleEmptyState);
+    };
+
+    const checkWorkEmpty = () => {
+      if (!workList || !workEmptyState) return;
+      const items = qsa(".w-dyn-item", workList);
+      const visible = items.filter((it) => {
+        const cs = window.getComputedStyle(it);
+        return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+      }).length;
+      (visible === 0) ? show(workEmptyState, "flex") : hide(workEmptyState);
+    };
+
+    // Set up observers for both tabs
+    const checkMainEmpty = () => {
+      if (!mainList || !mainEmptyState) return;
+      // Don't interfere with company page people tab
+      if (peopleList) return;
+      
+      const items = qsa(".w-dyn-item", mainList);
+      const visible = items.filter((it) => {
+        const cs = window.getComputedStyle(it);
+        return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+      }).length;
+      (visible === 0) ? show(mainEmptyState, "flex") : hide(mainEmptyState);
+    };
+
+    // Set up observers for company page tabs
+    if (peopleList && peopleEmptyState) {
+      new MutationObserver(checkPeopleEmpty).observe(peopleList, { childList: true, subtree: true });
+      window.addEventListener("load", checkPeopleEmpty);
+    }
+    
+    if (workList && workEmptyState) {
+      new MutationObserver(checkWorkEmpty).observe(workList, { childList: true, subtree: true });
+      window.addEventListener("load", checkWorkEmpty);
+    }
+    
+    // Set up observer for other pages (bookmarks, etc.)
+    if (mainList && mainEmptyState && !peopleList) {
+      new MutationObserver(checkMainEmpty).observe(mainList, { childList: true, subtree: true });
+      window.addEventListener("load", checkMainEmpty);
+    }
+  }
+
+  // ===== FILTERS + INFINITE SCROLL (shared) =====
+  let currentPage = 1, isLoading = false, endReached = false, debounceTimer;
+  const gatherSelectedFilters = () => {
+    const p = new URLSearchParams(); const groups = {};
+    qsa(".w-checkbox-input:checked").forEach((cb) => {
+      const { name, value } = cb; if (!groups[name]) groups[name] = []; groups[name].push(value);
+    });
+    qsa('input[type="radio"]:checked').forEach((r) => { if (r.name) p.set(r.name, r.value); });
+    Object.entries(groups).forEach(([k, vals]) => p.set(k, vals.join(",")));
+    const otw = qs("#open-to-work-toggle"); if (otw?.checked) p.set("opentowork","true");
+    return p;
+  };
+  const updateURLWithoutPage = (params) => {
+    const clean = new URLSearchParams(params); clean.delete("page");
+    const qsStr = clean.toString();
+    history.replaceState(null, "", qsStr ? `${location.pathname}?${qsStr}` : location.pathname);
+  };
+  const setResultsCount = (total) => {
+    if (total === undefined) return;
+    qsa('[fs-cmsfilter-element="results-count"], [data-filter-results-count]').forEach((el) => { el.innerText = total; });
+  };
+  const gatherScopeParams = (container) => {
+    const p = new URLSearchParams();
+    if (!container) return p;
+    const style = container.getAttribute("data-scope-style");
+    if (style) p.set("style", style);
+    const searchType = container.getAttribute("data-scope-search-type");
+    const searchTerm = container.getAttribute("data-scope-search-term");
+    if (searchType && searchTerm) {
+      p.set("search_type", searchType);
+      p.set("search_term", searchTerm);
+    }
+    return p;
+  };
+  const applyFadeInAnimation = () => {
+    qsa(".portfolio-card:not(.visible)").forEach((card) => { setTimeout(()=>card.classList.add("visible"),10); });
+  };
+  function restoreFiltersFromURL() {
+    const p = new URLSearchParams(location.search);
+    p.forEach((val, key) => {
+      val.split(",").forEach((v) => {
+        const cb = qs(`.w-checkbox-input[name="${key}"][value="${v}"]`);
+        if (cb) cb.checked = true;
+        const r = qs(`input[type="radio"][name="${key}"][value="${v}"]`);
+        if (r) r.checked = true;
+      });
+    });
+    if (p.get("opentowork") === "true") { const t = qs("#open-to-work-toggle"); if (t) t.checked = true; }
+    syncFilterChrome();
+  }
+  function syncFilterChrome() {
+    updateActiveRadioStyles();
+    if (window.WopFilters) window.WopFilters.syncUI();
+  }
+  function updateActiveRadioStyles() {
+    qsa("label.cms_tabs_inactive.w-radio").forEach((label) => {
+      label.classList.remove("fs-cmsfilter_active");
+      const r = qs('input[type="radio"]', label);
+      if (r?.checked) label.classList.add("fs-cmsfilter_active");
+    });
+  }
+  function updateFilterCount() {
+    syncFilterChrome();
+  }
+  function setupFilterListeners(fetchFn) {
+    qsa('.w-checkbox-input, #open-to-work-toggle, input[type="radio"]').forEach((el) => {
+      el.addEventListener("change", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          currentPage = 1; endReached = false;
+          fetchFn(true); syncFilterChrome();
+        }, 300);
+      });
+    });
+  }
+  function setupClearAll(fetchFn) {
+    const clearAll = () => {
+      qsa(".w-checkbox-input").forEach((cb) => (cb.checked = false));
+      const t = qs("#open-to-work-toggle"); if (t) t.checked = false;
+      const companyAll = qs('input[type="radio"][name="company"][value="All"]');
+      if (companyAll) companyAll.checked = true;
+      currentPage = 1; endReached = false;
+      history.replaceState(null, "", location.pathname);
+      setResultsCount(0);
+      if (window.WopFilters) window.WopFilters.closeAll();
+      syncFilterChrome();
+      fetchFn(true);
+    };
+    window._wopClearAllFilters = clearAll;
+    qsa('[fs-cmsfilter-element="clear"]').forEach((btn) => {
+      btn.addEventListener("click", (e) => { e.preventDefault(); clearAll(); });
+    });
+  }
+  function initInfiniteList() {
+    // === Branch: Company Detail Page with Tabs ===
+    const peopleContainer = qs("#people-cards-container");
+    const workContainer = qs("#work-cards-container");
+    
+    if (peopleContainer || workContainer) {
+      // Company detail page - handle both tabs separately
+      const companySlug = peopleContainer?.getAttribute("data-company-slug") || workContainer?.getAttribute("data-company-slug");
+      if (!companySlug) return;
+      
+      const companyUrl = `/companies/${companySlug}/`;
+      let peoplePage = 1, workPage = 1;
+      let peopleLoading = false, workLoading = false;
+      let peopleEndReached = false, workEndReached = false;
+      
+      const peopleLoader = qs("#people-infinite-loader");
+      const workLoader = qs("#work-infinite-loader");
+      
+      const fetchPeople = (reset = false) => {
+        if ((peopleLoading || peopleEndReached) && !reset) return;
+        if (!peopleContainer) return;
+        
+        if (reset) {
+          peoplePage = 1;
+          peopleEndReached = false;
+          peopleContainer.innerHTML = "";
+        }
+        
+        peopleLoading = true;
+        if (peopleLoader) show(peopleLoader);
+        
+        const params = new URLSearchParams();
+        params.append("page", peoplePage);
+        params.append("tab", "people");
+        
+        // Include team filter if set
+        const teamFilter = window.currentTeamFilter || 'present';
+        params.append("team", teamFilter);
+        
+        fetch(`${companyUrl}?${params.toString()}`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+          .then((r) => r.json())
+          .then((data) => {
+            peopleContainer.insertAdjacentHTML("beforeend", data.html || "");
+            applyFadeInAnimation();
+            if (data.has_next) {
+              peoplePage += 1;
+              peopleEndReached = false;
+            } else {
+              peopleEndReached = true;
+            }
+          })
+          .catch((err) => console.error("Error loading company portfolios:", err))
+          .finally(() => {
+            peopleLoading = false;
+            if (peopleLoader) hide(peopleLoader);
+          });
+      };
+      
+      // Expose fetchPeople globally for team filtering
+      window._wopFetchPeople = fetchPeople;
+      
+      // Only set default if not already set by companies.html template
+      if (!window.currentTeamFilter) {
+        window.currentTeamFilter = '{{default_team_filter}}';
+      }
+      
+      const fetchWork = (reset = false) => {
+        if ((workLoading || workEndReached) && !reset) return;
+        if (!workContainer) return;
+        
+        if (reset) {
+          workPage = 1;
+          workEndReached = false;
+          workContainer.innerHTML = "";
+        }
+        
+        workLoading = true;
+        if (workLoader) show(workLoader);
+        
+        const params = new URLSearchParams();
+        params.append("page", workPage);
+        params.append("tab", "work");
+        
+        fetch(`${companyUrl}?${params.toString()}`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+          .then((r) => r.json())
+          .then((data) => {
+            workContainer.insertAdjacentHTML("beforeend", data.html || "");
+            applyFadeInAnimation();
+            if (data.has_next) {
+              workPage += 1;
+              workEndReached = false;
+            } else {
+              workEndReached = true;
+            }
+          })
+          .catch((err) => console.error("Error loading company case studies:", err))
+          .finally(() => {
+            workLoading = false;
+            if (workLoader) hide(workLoader);
+          });
+      };
+      
+      // Initial load for People tab (active by default)
+      fetchPeople(true);
+      
+      // Infinite scroll handler
+      const handleScroll = () => {
+        const activeTab = qs(".company-tab.active");
+        if (!activeTab) return;
+        
+        const tabName = activeTab.getAttribute("data-tab");
+        const nearBottom = isAppScrollNearBottom(300);
+        
+        if (nearBottom) {
+          if (tabName === "people") {
+            fetchPeople(false);
+          } else if (tabName === "work") {
+            fetchWork(false);
+          }
+        }
+      };
+      
+      // Watch for tab changes - work tab content is already rendered, so we just need to enable infinite scroll
+      // The initial content is already in the template, so we start from page 2
+      const tabs = qsa(".company-tab");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const tabName = tab.getAttribute("data-tab");
+          if (tabName === "work" && workPage === 1 && !workLoading && !workEndReached) {
+            // Initial content is already rendered, so start from page 2
+            workPage = 2;
+          }
+        });
+      });
+      
+      onAppScroll(handleScroll);
+      return; // stop here; company detail page handled
+    }
+    
+    const container = qs("#cards-container");
+    if (!container) return; // not on list pages
+
+    const listType = container.getAttribute("data-list-type");
+    const loader = qs("#infinite-loader");
+
+    // === normal endpoints (portfolios / case-studies / bookmarks) ===
+    const endpoint =
+      listType === "case-studies" ? "/filter-case-studies/" :
+      listType === "bookmarks" ? "/filter-bookmarks/" :
+      listType === "bookmarks_casestudies" ? "/filter-bookmarks-casestudy/" :
+      listType === "bookmarks_works" ? "/filter-bookmarks-showcase/" :
+      "/filter-portfolios/";
+
+    const fetchList = (reset = false) => {
+      if ((isLoading || endReached) && !reset) return;
+
+      if (reset) {
+        currentPage = 1; endReached = false;
+        if (container) container.innerHTML = "";
+      }
+
+      isLoading = true; if (loader) show(loader);
+
+      const params = gatherSelectedFilters();
+      updateURLWithoutPage(params);
+      gatherScopeParams(container).forEach((value, key) => params.set(key, value));
+      params.append("page", currentPage);
+
+      fetch(`${endpoint}?${params.toString()}`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then((r) => r.json())
+        .then((data) => {
+          // container already cleared on reset
+          container.insertAdjacentHTML("beforeend", data.html || "");
+          applyFadeInAnimation();
+          setResultsCount(data.total_count);
+          if (data.has_next) { currentPage += 1; endReached = false; } else { endReached = true; }
+        })
+        .catch((err) => console.error(`Error loading ${listType}:`, err))
+        .finally(() => { isLoading = false; if (loader) hide(loader); });
+    };
+
+    // expose for global resets (e.g., after closing login on a filtered URL)
+    window._wopFetchList = fetchList;
+
+    // restore UI from URL and wire handlers
+    restoreFiltersFromURL();
+    setupFilterListeners(fetchList);
+    setupClearAll(fetchList);
+    fetchList(true);
+
+    // infinite scroll
+    onAppScroll(() => {
+      if (isAppScrollNearBottom(300)) fetchList(false);
+    });
+  }
+
+  // ===== BOOKMARK TOGGLE =====
+  function swapBookmarkImg(img, filled) {
+    if (!img) return;
+    // Prefer data attributes (works with hashed filenames in production)
+    const filledSrc = img.getAttribute("data-src-filled");
+    const emptySrc  = img.getAttribute("data-src-empty");
+  
+    if (filledSrc && emptySrc) {
+      img.setAttribute("src", filled ? filledSrc : emptySrc);
+    } else {
+      // Fallback for old markup (dev only where names are literal)
+      const src = img.getAttribute("src") || "";
+      if (filled) {
+        if (!/bookmarkfill\.svg/i.test(src)) {
+          img.setAttribute("src", src.replace(/bookmark\.svg(\?.*)?$/i, "bookmarkfill.svg$1"));
+        }
+      } else {
+        if (!/bookmark\.svg(\?.*)?$/i.test(src)) {
+          img.setAttribute("src", src.replace(/bookmarkfill\.svg(\?.*)?$/i, "bookmark.svg$1"));
+        }
+      }
+    }
+    const p = img.closest("a")?.querySelector("p");
+    if (p) p.textContent = filled ? "Bookmarked" : "Bookmark";
+  }
+  function setBookmarkStateEverywhere(pid, filled) {
+    qsa(`a.bookmark-toggle[data-id="${pid}"]`).forEach((a) => {
+      a.classList.toggle("is-bookmarked", !!filled);
+      a.setAttribute("aria-pressed", filled ? "true" : "false");
+      swapBookmarkImg(qs("img.bookmarktoggle", a), filled);
+    });
+  }
+  let toastTimer = null;
+  function showStatusBar(msg) {
+    const bar = document.querySelector(".statusbar-nuetral");
+    if (!bar) return;
+    const p = bar.querySelector("p");
+    if (p) p.textContent = msg;
+    bar.style.display = "flex";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (bar.style.display = "none"), 2200);
+  }
+  async function sendToggleRequest(pid, type = 'portfolio') {
+    const form = new FormData();
+    form.append("data_id", pid);
+    
+    // Use appropriate URL based on type
+    const toggleUrl = type === 'casestudy' ? CASESTUDY_BOOKMARK_TOGGLE_URL : BOOKMARK_TOGGLE_URL;
+    
+    const res = await fetch(toggleUrl, {
+      method: "POST",
+      headers: { "X-CSRFToken": getCookie("csrftoken") || "" },
+      body: form,
+      credentials: "same-origin",
+    });
+    if (res.redirected || res.status === 401) {
+      window.openLoginModal();
+      throw new Error("Auth required");
+    }
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+  function initBookmarkClicks() {
+    document.addEventListener("click", async (e) => {
+      const a = e.target.closest("a.bookmark-toggle");
+      if (!a) return;
+      e.preventDefault();
+      const pid = a.dataset.id;
+      const type = a.dataset.type || 'portfolio'; // default to portfolio for backward compatibility
+      if (!pid) return;
+
+      const wasFilled = a.classList.contains("is-bookmarked") ||
+                        /bookmarkfill\.svg/.test(qs("img.bookmarktoggle", a)?.src || "");
+      // optimistic
+      setBookmarkStateEverywhere(pid, !wasFilled);
+
+      try {
+        const data = await sendToggleRequest(pid, type);
+        setBookmarkStateEverywhere(data.data_id, data.status === "bookmarked");
+        showStatusBar(
+          data.status === "bookmarked" ? "Saved to Bookmarks" : "Removed from Bookmarks"
+        );
+      } catch (err) {
+        // rollback
+        setBookmarkStateEverywhere(pid, wasFilled);
+        if (String(err).includes("Auth required")) return; // modal already shown
+        console.error("Bookmark toggle failed:", err);
+        alert("Couldn't update bookmark. Please try again.");
+      }
+    });
+  }
+
+  // ===== COLLAPSE TOGGLE =====
+  // function initCollapseToggle() {
+  //   const collapseBtn = document.getElementById("collapseToggle");
+  //   const sidebarContent = document.getElementById("portfolio-sidebar-content");
+  //   const sideNav = document.querySelector(".side_nav_default");
+  //   const collapseImg = collapseBtn ? collapseBtn.querySelector("img.icon24x") : null;
+  //   
+  //   if (!collapseBtn || !sidebarContent || !sideNav) return;
+  //   
+  //   let isCollapsed = false;
+  //   
+  //   collapseBtn.addEventListener("click", (e) => {
+  //     e.preventDefault();
+  //     isCollapsed = !isCollapsed;
+  //     
+  //     if (isCollapsed) {
+  //       // Hide content and collapse sidebar to minimal width (just enough for button)
+  //       sidebarContent.style.display = "none";
+  //       sideNav.style.width = "24px";
+  //       sideNav.style.minWidth = "24px";
+  //       sideNav.style.overflow = "visible";
+  //       sideNav.style.padding = "0px";
+  //       // Rotate the collapse icon 180 degrees
+  //       if (collapseImg) {
+  //         collapseImg.style.transform = "rotate(180deg)";
+  //       }
+  //     } else {
+  //       // Show content and restore sidebar
+  //       sidebarContent.style.display = "flex";
+  //       sideNav.style.width = "";
+  //       sideNav.style.overflow = "";
+  //       sideNav.style.minWidth = "";
+  //       sideNav.style.padding = "";
+  //       // Reset the collapse icon rotation
+  //       if (collapseImg) {
+  //         collapseImg.style.transform = "";
+  //       }
+  //     }
+  //   });
+  // }
+
+  // ===== BOOT =====
+  onReady(() => {
+    // Initialize modules (loaded before this script)
+    if (window.Modals && window.Modals.init) window.Modals.init();
+    if (window.Auth && window.Auth.init) window.Auth.init();
+    if (window.MessagingApp && window.MessagingApp.init) window.MessagingApp.init();
+
+    // Initialize page-specific features
+    initProfileDropdown();
+    initNotificationDropdown();
+    
+    // Refresh message badge count and connect navbar WebSocket (for logged-in users)
+    if (isLoggedIn && isLoggedIn()) {
+      refreshMessageBadge();
+      // Connect navbar WebSocket for real-time badge updates
+      connectNavbarWebSocket();
+    }
+
+    initPtmStoryToggle();
+    initShowMoreLess();
+    initFinsweetCountBubble();
+    initCustomEmptyStateObserver();
+    initInfiniteList();
+    initBookmarkClicks();
+
+    // Initialize sidebar collapse toggle
+    // initCollapseToggle();
+
+    // Auto-prompt login if someone lands on a filtered URL (optional)
+    if (isLoggedIn && !isLoggedIn() && window.Auth && window.Auth.hasActiveFilterParams && window.Auth.hasActiveFilterParams()) {
+      if (window.openLoginModal) window.openLoginModal();
+    }
+  });
+})();
